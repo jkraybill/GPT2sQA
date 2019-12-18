@@ -250,7 +250,7 @@ def convert_examples_to_features(examples, tokenizer, max_seq_length,
                     end_position=end_position,
                     is_impossible=example.is_impossible))
             unique_id += 1
-    print('total_missed:' + total_missed)
+    print('total_missed:' + str(total_missed))
     return features
 
 
