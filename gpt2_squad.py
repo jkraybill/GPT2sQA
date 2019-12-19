@@ -101,6 +101,10 @@ def main():
                         type=int,
                         default=-1,
                         help="local_rank for distributed training on gpus")
+    parser.add_argument("--max_examples",
+                        type=int,
+                        default=1000,
+                        help="Max number of SQuAD examples to load for training")
     parser.add_argument('--loss_scale',
                         type=float, default=0,
                         help="Loss scaling to improve fp16 numeric stability. Only used when fp16 set to True.\n"
@@ -163,7 +167,7 @@ def main():
     train_examples = None
     num_train_optimization_steps = None
     if args.do_train:
-        train_examples = read_squad_examples(input_file=args.train_file, is_training=True)   
+        train_examples = read_squad_examples(input_file=args.train_file, is_training=True, max_examples=args.max_examples)   
         num_train_optimization_steps = int(len(train_examples) / args.train_batch_size / args.gradient_accumulation_steps) * args.num_train_epochs
         if args.local_rank != -1:
             num_train_optimization_steps = num_train_optimization_steps // torch.distributed.get_world_size()
@@ -277,7 +281,7 @@ def main():
 
     if args.do_predict and (args.local_rank == -1 or torch.distributed.get_rank() == 0):
         eval_examples = read_squad_examples(
-            input_file=args.predict_file, is_training=False, )
+            input_file=args.predict_file, is_training=False, max_examples=args.max_examples)
         eval_features = convert_examples_to_features(
             examples=eval_examples,
             tokenizer=tokenizer,
